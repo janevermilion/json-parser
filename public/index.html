@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JSON ⇄ CSV конвертер</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(145deg, #f6f9fc 0%, #e9f0f5 100%);
+      padding: 1.5rem;
+    }
+
+    .card {
+      max-width: 1100px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 3rem;
+      padding: 2.5rem 2.8rem;
+      box-shadow: 0 25px 45px -12px rgba(0, 20, 40, 0.25),
+      inset 0 1px 2px rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+
+    h1 {
+      font-size: 2.4rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: #0b1e2e;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 2.2rem;
+      border-bottom: 2px solid rgba(60, 130, 200, 0.15);
+      padding-bottom: 0.9rem;
+    }
+
+    h1 span {
+      background: linear-gradient(135deg, #1a5a8c, #2b7bb6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .converter-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    @media (max-width: 768px) {
+      .card {
+        padding: 1.8rem;
+      }
+      .converter-grid {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+      }
+      h1 {
+        font-size: 2rem;
+      }
+    }
+
+    .block {
+      background: white;
+      border-radius: 2rem;
+      padding: 1.8rem 1.8rem 2rem;
+      box-shadow: 0 8px 24px rgba(0, 20, 40, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      transition: transform 0.15s ease, box-shadow 0.2s;
+    }
+
+    .block:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 16px 32px -8px rgba(0, 40, 80, 0.12);
+    }
+
+    .block-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #1e3a5a;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .block-title .badge {
+      background: #e4edf5;
+      border-radius: 100px;
+      padding: 0.2rem 0.8rem;
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      color: #1f5b8a;
+      margin-left: auto;
+    }
+
+    .file-upload-area {
+      background: #f2f8fe;
+      border-radius: 1.5rem;
+      padding: 0.2rem;
+      border: 1px dashed #b7d2e8;
+      transition: background 0.2s;
+      margin-bottom: 1rem;
+    }
+
+    .file-upload-area:hover {
+      background: #eaf3fc;
+      border-color: #6ea5d0;
+    }
+
+    .file-upload-area input[type="file"] {
+      display: block;
+      width: 100%;
+      padding: 0.9rem 1.2rem;
+      font-size: 0.95rem;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #1e3a5a;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .file-upload-area input[type="file"]::file-selector-button {
+      background: white;
+      border: none;
+      border-radius: 40px;
+      padding: 0.5rem 1.2rem;
+      margin-right: 1rem;
+      font-weight: 500;
+      color: #1a5a8c;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+      border: 1px solid #d6e5f2;
+      transition: 0.15s;
+      cursor: pointer;
+    }
+
+    .file-upload-area input[type="file"]::file-selector-button:hover {
+      background: #e3f0fa;
+      border-color: #8bb9df;
+    }
+
+    .file-name-preview {
+      font-size: 0.85rem;
+      color: #3d6588;
+      padding: 0 0.5rem 0.6rem 1.2rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      opacity: 0.9;
+      min-height: 1.8rem;
+    }
+
+    .file-name-preview.multiple {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .file-name-preview .file-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .file-name-preview .file-item .status-icon {
+      font-size: 0.8rem;
+    }
+
+    .file-name-preview .file-item .file-name {
+      font-size: 0.8rem;
+    }
+
+    .action-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 0.6rem;
+    }
+
+    .btn {
+      background: white;
+      border: none;
+      padding: 0.7rem 2rem;
+      border-radius: 60px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #1a5a8c;
+      border: 1px solid #c7dcee;
+      box-shadow: 0 2px 6px rgba(0, 20, 30, 0.02);
+      transition: all 0.15s;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: #f5faff;
+      letter-spacing: 0.01em;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .btn-primary {
+      background: #1a5a8c;
+      border: 1px solid #1a5a8c;
+      color: white;
+      box-shadow: 0 6px 14px rgba(26, 90, 140, 0.25);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: #134b77;
+      border-color: #134b77;
+      transform: scale(0.98);
+      box-shadow: 0 4px 10px rgba(26, 90, 140, 0.3);
+    }
+
+    .btn-primary:active:not(:disabled) {
+      transform: scale(0.96);
+    }
+
+    .status-message {
+      margin-top: 0.8rem;
+      padding: 0.5rem 0.2rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #1e5a7a;
+      min-height: 2.2rem;
+      border-radius: 12px;
+      transition: 0.1s;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .status-message.success {
+      color: #0f6d3b;
+    }
+    .status-message.error {
+      color: #b13e3e;
+    }
+    .status-message.info {
+      color: #2b6d9e;
+    }
+    .status-message.loading {
+      color: #d49b1a;
+    }
+
+    .footer-hint {
+      margin-top: 2rem;
+      text-align: center;
+      font-size: 0.8rem;
+      color: #6f8da8;
+      border-top: 1px solid rgba(60, 120, 180, 0.08);
+      padding-top: 1.2rem;
+      display: flex;
+      justify-content: center;
+      gap: 1.2rem;
+      flex-wrap: wrap;
+    }
+
+    .footer-hint span {
+      background: #eaf1f9;
+      padding: 0.2rem 1rem;
+      border-radius: 40px;
+      color: #1f5b8a;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+<div class="card">
+  <h1>
+    <span>⇄</span> JSON · CSV <span>конвертер</span>
+  </h1>
+
+  <div class="converter-grid">
+    <!-- БЛОК 1: JSON → CSV -->
+    <div class="block" id="jsonToCsvBlock">
+      <div class="block-title">
+        <span>📄 JSON → CSV</span>
+        <span class="badge">.json</span>
+      </div>
+
+      <div class="file-upload-area">
+        <input type="file" id="jsonFileInput" accept=".json,application/json" />
+      </div>
+      <div class="file-name-preview" id="jsonFileName">Файл не выбран</div>
+
+      <div class="action-row">
+        <button class="btn btn-primary" id="jsonToCsvBtn">📤 Отправить</button>
+      </div>
+
+      <div id="jsonStatus" class="status-message info">⏳ Ожидает файл</div>
+    </div>
+
+    <!-- БЛОК 2: CSV + JSON → JSON -->
+    <div class="block" id="csvToJsonBlock">
+      <div class="block-title">
+        <span>📊 CSV + JSON → JSON</span>
+        <span class="badge">.csv + .json</span>
+      </div>
+
+      <div class="file-upload-area">
+        <input type="file" id="csvFileInput" accept=".csv,text/csv" />
+      </div>
+      <div class="file-name-preview" id="csvFileName">CSV файл не выбран</div>
+
+      <div class="file-upload-area" style="margin-top: 0.5rem;">
+        <input type="file" id="jsonStructureFileInput" accept=".json,application/json" />
+      </div>
+      <div class="file-name-preview" id="jsonStructureFileName">JSON структура не выбрана</div>
+
+      <div class="action-row">
+        <button class="btn btn-primary" id="csvToJsonBtn">📤 Отправить оба</button>
+      </div>
+
+      <div id="csvStatus" class="status-message info">⏳ Ожидает файлы</div>
+    </div>
+  </div>
+
+  <div class="footer-hint">
+    <span>📎 Загрузите .json или .csv</span>
+    <span>🚀 Отправка на бэкенд</span>
+    <span>⬇️ Автоскачивание результата</span>
+  </div>
+</div>
+
+<script>
+  (function() {
+    "use strict";
+
+    // DOM элементы
+    const jsonFileInput = document.getElementById('jsonFileInput');
+    const csvFileInput = document.getElementById('csvFileInput');
+    const jsonStructureFileInput = document.getElementById('jsonStructureFileInput');
+    const jsonFileName = document.getElementById('jsonFileName');
+    const csvFileName = document.getElementById('csvFileName');
+    const jsonStructureFileName = document.getElementById('jsonStructureFileName');
+    const jsonStatus = document.getElementById('jsonStatus');
+    const csvStatus = document.getElementById('csvStatus');
+    const jsonToCsvBtn = document.getElementById('jsonToCsvBtn');
+    const csvToJsonBtn = document.getElementById('csvToJsonBtn');
+
+    // Функция для отображения статуса
+    function setStatus(element, message, type = 'info') {
+      element.textContent = message;
+      element.className = 'status-message ' + type;
+    }
+
+    // Функция для отображения имени файла
+    function updateFileName(inputElement, displayElement, label = 'Файл') {
+      if (inputElement.files && inputElement.files.length > 0) {
+        displayElement.textContent = '📎 ' + inputElement.files[0].name;
+        displayElement.style.color = '#0f6d3b';
+      } else {
+        displayElement.textContent = label + ' не выбран';
+        displayElement.style.color = '#3d6588';
+      }
+    }
+
+    // Обновление имени файла при выборе
+    jsonFileInput.addEventListener('change', function() {
+      updateFileName(jsonFileInput, jsonFileName, 'JSON файл');
+      setStatus(jsonStatus, '📄 Файл загружен, нажмите "Отправить"', 'info');
+    });
+
+    csvFileInput.addEventListener('change', function() {
+      updateFileName(csvFileInput, csvFileName, 'CSV файл');
+      checkCSVFiles();
+    });
+
+    jsonStructureFileInput.addEventListener('change', function() {
+      updateFileName(jsonStructureFileInput, jsonStructureFileName, 'JSON структура');
+      checkCSVFiles();
+    });
+
+    function checkCSVFiles() {
+      const hasCSV = csvFileInput.files && csvFileInput.files.length > 0;
+      const hasJSON = jsonStructureFileInput.files && jsonStructureFileInput.files.length > 0;
+
+      if (hasCSV && hasJSON) {
+        setStatus(csvStatus, '📊 Оба файла загружены, нажмите "Отправить оба"', 'info');
+      } else if (hasCSV || hasJSON) {
+        setStatus(csvStatus, '⏳ Ожидает второй файл...', 'info');
+      } else {
+        setStatus(csvStatus, '⏳ Ожидает файлы', 'info');
+      }
+    }
+
+    // Функция для автоскачивания файла
+    function downloadFile(blob, fileName) {
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    }
+
+    // Функция для получения имени файла из Content-Disposition
+    function getFileNameFromResponse(response) {
+      const disposition = response.headers.get('content-disposition');
+      if (disposition) {
+        const filenameMatch = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+        if (filenameMatch && filenameMatch[1]) {
+          let filename = filenameMatch[1].replace(/['"]/g, '');
+          if (filename.startsWith("UTF-8''")) {
+            filename = decodeURIComponent(filename.replace("UTF-8''", ''));
+          }
+          return filename;
+        }
+      }
+      return null;
+    }
+
+    // --- Отправка одного файла (JSON → CSV) ---
+    async function sendSingleFile(file, endpoint, statusElement, buttonElement, successMessage, outputExtension) {
+      if (!file) {
+        setStatus(statusElement, '❌ Пожалуйста, выберите файл', 'error');
+        return;
+      }
+
+      buttonElement.disabled = true;
+      const originalText = buttonElement.innerHTML;
+      buttonElement.innerHTML = '<span class="spinner"></span> Отправка...';
+      setStatus(statusElement, '⏳ Отправка файла на сервер...', 'loading');
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Сервер вернул ошибку ${response.status}: ${errorText}`);
+        }
+
+        const blob = await response.blob();
+        let outputFileName = getFileNameFromResponse(response);
+        if (!outputFileName) {
+          const inputName = file.name;
+          const baseName = inputName.substring(0, inputName.lastIndexOf('.'));
+          outputFileName = `${baseName}.${outputExtension}`;
+        }
+
+        downloadFile(blob, outputFileName);
+        setStatus(statusElement, `✅ ${successMessage} Файл "${outputFileName}" скачан`, 'success');
+
+      } catch (error) {
+        console.error('❌ Ошибка:', error);
+        setStatus(statusElement, `❌ Ошибка: ${error.message}`, 'error');
+      } finally {
+        buttonElement.disabled = false;
+        buttonElement.innerHTML = originalText;
+      }
+    }
+
+    // --- Отправка двух файлов (CSV + JSON → JSON) ---
+    async function sendTwoFiles(csvFile, jsonFile, endpoint, statusElement, buttonElement, successMessage) {
+      if (!csvFile || !jsonFile) {
+        setStatus(statusElement, '❌ Пожалуйста, выберите оба файла', 'error');
+        return;
+      }
+
+      buttonElement.disabled = true;
+      const originalText = buttonElement.innerHTML;
+      buttonElement.innerHTML = '<span class="spinner"></span> Отправка...';
+      setStatus(statusElement, '⏳ Отправка файлов на сервер...', 'loading');
+
+      const formData = new FormData();
+      formData.append('csvFile', csvFile);
+      formData.append('jsonFile', jsonFile);
+
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Сервер вернул ошибку ${response.status}: ${errorText}`);
+        }
+
+        const blob = await response.blob();
+        let outputFileName = getFileNameFromResponse(response);
+        if (!outputFileName) {
+          const baseName = csvFile.name.substring(0, csvFile.name.lastIndexOf('.'));
+          outputFileName = `${baseName}_merged.json`;
+        }
+
+        downloadFile(blob, outputFileName);
+        setStatus(statusElement, `✅ ${successMessage} Файл "${outputFileName}" скачан`, 'success');
+
+      } catch (error) {
+        console.error('❌ Ошибка:', error);
+        setStatus(statusElement, `❌ Ошибка: ${error.message}`, 'error');
+      } finally {
+        buttonElement.disabled = false;
+        buttonElement.innerHTML = originalText;
+      }
+    }
+
+    // --- Обработчик для JSON → CSV ---
+    jsonToCsvBtn.addEventListener('click', function() {
+      const file = jsonFileInput.files[0];
+      if (file) {
+        const fileName = file.name.toLowerCase();
+        if (!fileName.endsWith('.json')) {
+          setStatus(jsonStatus, '⚠️ Файл должен иметь расширение .json', 'error');
+          return;
+        }
+      }
+      sendSingleFile(
+              file,
+              '/api/json-to-csv',
+              jsonStatus,
+              jsonToCsvBtn,
+              'JSON успешно сконвертирован в CSV',
+              'csv'
+      );
+    });
+
+    // --- Обработчик для CSV + JSON → JSON ---
+    csvToJsonBtn.addEventListener('click', function() {
+      const csvFile = csvFileInput.files[0];
+      const jsonFile = jsonStructureFileInput.files[0];
+
+      if (csvFile) {
+        const csvName = csvFile.name.toLowerCase();
+        if (!csvName.endsWith('.csv')) {
+          setStatus(csvStatus, '⚠️ Первый файл должен быть .csv', 'error');
+          return;
+        }
+      }
+
+      if (jsonFile) {
+        const jsonName = jsonFile.name.toLowerCase();
+        if (!jsonName.endsWith('.json')) {
+          setStatus(csvStatus, '⚠️ Второй файл должен быть .json', 'error');
+          return;
+        }
+      }
+
+      sendTwoFiles(
+              csvFile,
+              jsonFile,
+              '/api/csv-to-json',
+              csvStatus,
+              csvToJsonBtn,
+              'CSV и JSON успешно соединены'
+      );
+    });
+
+    // Инициализация статусов
+    setStatus(jsonStatus, '📄 Загрузите JSON-файл для отправки', 'info');
+    setStatus(csvStatus, '📊 Загрузите CSV и JSON файлы', 'info');
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+{
+  "name": "xml-json-parser",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www",
+    "dev": "nodemon ./bin/www"
+  },
+  "dependencies": {
+    "@json2csv/plainjs": "^7.0.6",
+    "cookie-parser": "~1.4.4",
+    "cors": "^2.8.6",
+    "csvtojson": "^2.0.14",
+    "debug": "~2.6.9",
+    "express": "~4.16.1",
+    "json2csv": "^6.0.0-alpha.2",
+    "morgan": "~1.9.1",
+    "multer": "^2.2.0",
+    "nodemon": "^3.1.14",
+    "xmldom": "^0.6.0"
+  }
+}
