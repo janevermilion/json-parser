@@ -57,86 +57,34 @@ router.post('/', upload.fields([
             });
         }
 
-        // 3. Создаем карту соответствий из CSV: id -> Params
+        // 3. Создаем карту соответствий из CSV: id -> XML строка
         const csvMap = {};
         csvData.forEach((row, index) => {
+            // Ищем id (может быть в разных полях)
             const csvId = row['id']?.trim() || row['Id']?.trim() || row['ID']?.trim();
 
             if (csvId && csvId !== 'N/A' && csvId !== '') {
                 console.log(`\n📌 Обработка строки ${index + 1}, id: ${csvId}`);
 
-                // Получаем name и type из CSV
-                const elementName = row['name']?.trim() || row['Name']?.trim() || csvId;
-                const elementType = row['type']?.trim() || row['Type']?.trim() || 'saturn-devices[valve]';
+                // Формируем XML строку для Params
+                let paramsString = `<element id="${csvId}"`;
 
-                console.log(`  name из CSV: "${elementName}"`);
-                console.log(`  type из CSV: "${elementType}"`);
+                // Добавляем все атрибуты из CSV
+                const skipKeys = ['id', 'Id', 'ID'];
+                let hasAttributes = false;
 
-                // Собираем все атрибуты (кроме служебных)
-                const skipKeys = [
-                    'id', 'Id', 'ID',
-                    'name', 'Name',
-                    'type', 'Type',
-                    'submodels', 'submodel',
-                    'updated_params', 'updated-params',
-                    'Model_Index', 'Original_Name', 'Original_Id', 'Original_Path',
-                    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
-                ];
-
-                // Собираем атрибуты (только непустые)
-                const attrs = {};
                 Object.keys(row).forEach(key => {
                     const value = row[key]?.trim();
                     if (value && value !== '' && value !== 'N/A' && !skipKeys.includes(key)) {
-                        if (!value.includes('<submodel') && !value.includes('<')) {
-                            attrs[key] = value;
-                            console.log(`  📊 Атрибут ${key}: "${value}"`);
-                        }
-                    }
-                });
-
-                // Собираем submodels если есть
-                const submodelParts = [];
-                Object.keys(row).forEach(key => {
-                    const value = row[key]?.trim();
-                    if (value && value !== '' && value !== 'N/A' && value.includes('<submodel')) {
-                        let cleanValue = value.replace(/\s+/g, ' ').trim();
-                        submodelParts.push(cleanValue);
-                    }
-                });
-
-                let submodelsString = submodelParts.join('');
-                submodelsString = submodelsString.replace(/\/>\s+</g, '/><');
-                submodelsString = submodelsString.replace(/>\s+</g, '><');
-                submodelsString = submodelsString.replace(/\s+/g, ' ').trim();
-
-                // Формируем Params - ВСЕ значения в кавычках
-                let paramsString = `<element id="${csvId}"`;
-
-                // Добавляем name (всегда в кавычках)
-                if (elementName && elementName !== '') {
-                    paramsString += ` name="${elementName}"`;
-                } else {
-                    paramsString += ` name="${csvId}"`;
-                }
-
-                // Добавляем type (всегда в кавычках)
-                if (elementType && elementType !== '') {
-                    paramsString += ` type="${elementType}"`;
-                }
-
-                // Добавляем все остальные атрибуты - ВСЕГДА в кавычках
-                Object.keys(attrs).forEach(key => {
-                    const value = attrs[key];
-                    if (value && value !== '') {
-                        // ВСЕГДА заключаем в кавычки, даже числа
+                        // Добавляем атрибут (всегда в кавычках)
                         paramsString += ` ${key}="${value}"`;
+                        hasAttributes = true;
+                        console.log(`  📊 Атрибут ${key}: "${value}"`);
                     }
                 });
 
-                // Добавляем submodels если есть
-                if (submodelsString) {
-                    paramsString += `>${submodelsString}</element>`;
+                if (hasAttributes) {
+                    paramsString += ` />`;
                 } else {
                     paramsString += ` />`;
                 }
@@ -181,8 +129,9 @@ router.post('/', upload.fields([
         // 6. Обновляем Params у каждого элемента
         let updatedCount = 0;
         modelsArray.forEach((model, index) => {
+            // Ищем id в текущем Params
             let currentId = null;
-            if (model.Params) {
+            if (model.Params && typeof model.Params === 'string') {
                 const idMatch = model.Params.match(/<element\s+id="([^"]+)"/);
                 if (idMatch) {
                     currentId = idMatch[1];
@@ -190,7 +139,7 @@ router.post('/', upload.fields([
             }
 
             console.log(`\n🔄 Элемент ${index + 1}:`);
-            console.log(`  Name: ${model.Name}`);
+            console.log(`  Name: ${model.Name || model.DisplayName || 'без имени'}`);
             console.log(`  Current ID: ${currentId}`);
 
             if (currentId && csvMap[currentId]) {
@@ -204,7 +153,7 @@ router.post('/', upload.fields([
             }
         });
 
-        console.log(`\n✅ Обновлено ${updatedCount} элементов`);
+        console.log(`\n✅ Обновлено ${updatedCount} из ${modelsArray.length} элементов`);
 
         // 7. Отправляем результат
         const outputFileName = csvFile.originalname.replace(/\.csv$/i, '_merged.json');
