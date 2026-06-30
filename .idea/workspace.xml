@@ -6,6 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="891f14f8-c4a9-4b5f-830d-e40ecf5841a6" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/example_valves.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/routes/CSVtoJson.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/CSVtoJson.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -23,7 +26,7 @@
 }</component>
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/janevermilion/json-parser.git&quot;,
+    &quot;url&quot;: &quot;git@github.com:janevermilion/json-parser.git&quot;,
     &quot;accountId&quot;: &quot;daa4e540-341e-40df-9f60-da9551314ad0&quot;
   }
 }</component>
@@ -41,26 +44,27 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "main",
-    "javascript.nodejs.core.library.configured.version": "22.22.1",
-    "javascript.nodejs.core.library.typings.version": "22.20.0",
-    "last_opened_file_path": "/home/evgenia/WebstormProjects/json-parser",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_interpreter_path": "node",
-    "nodejs_package_manager_path": "npm",
-    "npm.dev.executor": "Run",
-    "npm.start.executor": "Run",
-    "ts.external.directory.path": "/home/evgenia/Документы/WebStorm-2024.3.1.1/WebStorm-243.22562.222/plugins/javascript-plugin/jsLanguageServicesImpl/external",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;javascript.nodejs.core.library.configured.version&quot;: &quot;22.22.1&quot;,
+    &quot;javascript.nodejs.core.library.typings.version&quot;: &quot;22.20.0&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/evgenia/WebstormProjects/json-parser&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_interpreter_path&quot;: &quot;/home/evgenia/.nvm/versions/node/v26.4.0/bin/node&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;npm.dev.executor&quot;: &quot;Run&quot;,
+    &quot;npm.start.executor&quot;: &quot;Run&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;settings.nodejs&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;/home/evgenia/Документы/WebStorm-2024.3.1.1/WebStorm-243.22562.222/plugins/javascript-plugin/jsLanguageServicesImpl/external&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$" />
@@ -115,10 +119,26 @@
       <workItem from="1782383455119" duration="10000" />
       <workItem from="1782386268976" duration="618000" />
       <workItem from="1782391694255" duration="392000" />
+      <workItem from="1782394763059" duration="3060000" />
+      <workItem from="1782462379364" duration="2818000" />
+      <workItem from="1782723074479" duration="1098000" />
+      <workItem from="1782745028831" duration="25000" />
+      <workItem from="1782828738462" duration="1662000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>
